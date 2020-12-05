@@ -88,11 +88,13 @@ impl RefLike {
     ///
     /// If `base` is not a prefix of `self`, or `base` equals the path in `self`
     /// (ie. the result would be the empty path, which is not a valid
-    /// [`RefLike`].
-    pub fn strip_prefix<P: AsRef<Path>>(&self, base: P) -> Result<Self, StripPrefixError> {
+    /// [`RefLike`]).
+    pub fn strip_prefix<P: AsRef<str>>(&self, base: P) -> Result<Self, StripPrefixError> {
+        let base = base.as_ref();
+        let base = format!("{}/", base.strip_suffix("/").unwrap_or(base));
         self.0
-            .strip_prefix(base)
-            .map_err(StripPrefixError::from)
+            .strip_prefix(&base)
+            .ok_or(StripPrefixError::NotPrefix)
             .and_then(|path| {
                 if path.as_os_str().is_empty() {
                     Err(StripPrefixError::ImproperPrefix)
@@ -805,6 +807,15 @@ mod tests {
         fn serde_invalid() {
             let json = serde_json::to_string(Path::new("HEAD^")).unwrap();
             assert!(serde_json::from_str::<RefspecPattern>(&json).is_err())
+        }
+
+        #[test]
+        fn strip_prefix_works_for_different_ends() {
+            let refl = RefLike::try_from("refs/heads/next").unwrap();
+            assert_eq!(
+                refl.strip_prefix("refs/heads").unwrap(),
+                refl.strip_prefix("refs/heads/").unwrap()
+            );
         }
     }
 }
