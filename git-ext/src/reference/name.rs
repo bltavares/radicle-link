@@ -493,46 +493,6 @@ impl TryFrom<&[u8]> for RefspecPattern {
 }
 
 impl FromStr for RefspecPattern {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::try_from(s)
-    }
-}
-
-impl TryFrom<String> for RefspecPattern {
-    type Error = Error;
-
-    fn try_from(s: String) -> Result<Self, Self::Error> {
-        Self::try_from(s.as_str())
-    }
-}
-
-impl TryFrom<PathBuf> for RefspecPattern {
-    type Error = Error;
-
-    fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
-        path.to_str().ok_or(Error::Utf8).and_then(Self::try_from)
-    }
-}
-
-impl TryFrom<&Path> for RefspecPattern {
-    type Error = Error;
-
-    fn try_from(path: &Path) -> Result<Self, Self::Error> {
-        path.to_str().ok_or(Error::Utf8).and_then(Self::try_from)
-    }
-}
-
-impl From<RefspecPattern> for PathBuf {
-    fn from(RefspecPattern(path): RefspecPattern) -> Self {
-        path
-    }
-}
-
-impl Display for RefspecPattern {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(self.as_str())
     }
 }
 
