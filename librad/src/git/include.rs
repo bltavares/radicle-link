@@ -50,7 +50,7 @@ pub enum Error {
     MissingRefspec,
 
     #[error(transparent)]
-    Persist(#[from] tempfile::PersistError),
+    Persist(#[from] tempfile::PathPersistError),
 
     #[error(transparent)]
     Refname(#[from] ext::reference::name::Error),
@@ -107,8 +107,11 @@ impl<Path> Include<Path> {
         Path: AsRef<path::Path>,
     {
         let tmp = NamedTempFile::new_in(&self.path)?;
+        // Windows: Does not allow open files to be modified.
+        // Close the file handler without deleting the file
+        let tmp = tmp.into_temp_path();
         {
-            let mut config = git2::Config::open(tmp.path())?;
+            let mut config = git2::Config::open(&tmp)?;
             for remote in &self.remotes {
                 let (url_key, url) = url_entry(&remote);
 

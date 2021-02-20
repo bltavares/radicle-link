@@ -18,7 +18,6 @@
 use std::{
     convert::{TryFrom, TryInto},
     fmt::{self, Display},
-    path::PathBuf,
 };
 
 use git_ext as ext;
@@ -322,18 +321,20 @@ where
     &'a R: AsRemote,
 {
     fn from(r: &'a Reference<N, R, One>) -> Self {
-        let mut path = PathBuf::new();
-        path.push("refs/namespaces");
-        path.push(r._namespace.as_namespace());
-        path.push("refs");
+        let mut path = String::new();
+        path.push_str("refs/namespaces/");
+        path.push_str(&r._namespace.as_namespace());
+        path.push_str("/refs");
         if let Some(ref remote) = r.remote {
-            path.push("remotes");
-            path.push(Into::<ext::RefLike>::into(remote))
+            path.push_str("/remotes/");
+            path.push_str(Into::<ext::RefLike>::into(remote).as_ref());
         }
-        path.push(Into::<ext::RefLike>::into(r.category));
-        path.push(ext::OneLevel::from(r.name.clone()));
+        path.push_str("/");
+        path.push_str(Into::<ext::RefLike>::into(r.category).as_ref());
+        path.push_str("/");
+        path.push_str(ext::OneLevel::from(r.name.clone()).as_ref());
 
-        ext::RefLike::try_from(path.as_path()).unwrap()
+        ext::RefLike::try_from(path).unwrap()
     }
 }
 
@@ -399,18 +400,20 @@ where
     &'a R: AsRemote,
 {
     fn from(r: &'a Reference<N, R, Many>) -> Self {
-        let mut path = PathBuf::new();
-        path.push("refs/namespaces");
-        path.push(r._namespace.as_namespace());
-        path.push("refs");
+        let mut path = String::new();
+        path.push_str("refs/namespaces/");
+        path.push_str(&r._namespace.as_namespace());
+        path.push_str("/refs");
         if let Some(ref remote) = r.remote {
-            path.push("remotes");
-            path.push(Into::<ext::RefLike>::into(remote));
+            path.push_str("/remotes/");
+            path.push_str(Into::<ext::RefLike>::into(remote).as_ref());
         }
-        path.push(Into::<ext::RefLike>::into(r.category));
-        path.push(&r.name);
+        path.push_str("/");
+        path.push_str(Into::<ext::RefLike>::into(r.category).as_ref());
+        path.push_str("/");
+        path.push_str(&r.name);
 
-        ext::RefspecPattern::try_from(path.as_path()).unwrap()
+        ext::RefspecPattern::try_from(path).unwrap()
     }
 }
 

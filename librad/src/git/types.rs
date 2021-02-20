@@ -93,7 +93,7 @@ where
             Some(ref remote) => reflike!("refs/remotes").join(remote),
         };
 
-        ext::RefspecPattern::try_from((*refl).join(&r.name)).unwrap()
+        ext::RefspecPattern::try_from(format!("{}/{}", &refl, &r.name)).unwrap()
     }
 }
 
